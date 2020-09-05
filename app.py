@@ -16,7 +16,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Allow flask extensions raise their own errors, and return error codes instead 500 for everything
 app.config["PROPAGATE_EXCEPTIONS"] = True
-app.secret_key = "haitao"   # can add jwt secret key separately by app.config['JWT_SECRET_KEY]
+app.secret_key = (
+    "haitao"  # can add jwt secret key separately by app.config['JWT_SECRET_KEY]
+)
 api = Api(app)
 
 
@@ -25,7 +27,14 @@ def create_tables():
     db.create_all()
 
 
-jwt = JWTManager(app) # not create /auth as flask_jwt
+jwt = JWTManager(app)  # not create /auth as flask_jwt
+
+
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    if identity == 1:  # should read from a config file instead of hard-coding
+        return {"is_admin": True}
+    return {"is_admin": False}
 
 
 api.add_resource(Item, "/item/<string:name>")
@@ -34,7 +43,7 @@ api.add_resource(UserRegister, "/register")
 api.add_resource(Store, "/store/<string:name>")
 api.add_resource(StoreList, "/stores")
 api.add_resource(User, "/user/<int:user_id>")
-api.add_resource(UserLogin, '/login')
+api.add_resource(UserLogin, "/login")
 
 if __name__ == "__main__":
     db.init_app(app)
