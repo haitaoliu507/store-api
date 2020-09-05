@@ -14,7 +14,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "sqlite:///data.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Allow flask extensions raise their own errors, and return error codes instead 500 for everything
 app.secret_key = "haitao"
+app.config["PROPAGATE_EXCEPTIONS"] = True
 api = Api(app)
 
 
