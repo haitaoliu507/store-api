@@ -4,20 +4,19 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from security import authenticate, identity
-from resources.user import UserRegister, User
+from resources.user import UserRegister, User, UserLogin
 from resources.item import Item, Itemlist
 from resources.store import Store, StoreList
 
 app = Flask(__name__)
-# change flask_sqlachemy tracker
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "sqlite:///data.db"
 )
+# change flask_sqlachemy tracker
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Allow flask extensions raise their own errors, and return error codes instead 500 for everything
-app.secret_key = "haitao"
 app.config["PROPAGATE_EXCEPTIONS"] = True
+app.secret_key = "haitao"   # can add jwt secret key separately by app.config['JWT_SECRET_KEY]
 api = Api(app)
 
 
@@ -26,7 +25,7 @@ def create_tables():
     db.create_all()
 
 
-jwt = JWT(app, authenticate, identity)  # /auth
+jwt = JWTManager(app) # not create /auth as flask_jwt
 
 
 api.add_resource(Item, "/item/<string:name>")
@@ -35,6 +34,7 @@ api.add_resource(UserRegister, "/register")
 api.add_resource(Store, "/store/<string:name>")
 api.add_resource(StoreList, "/stores")
 api.add_resource(User, "/user/<int:user_id>")
+api.add_resource(UserLogin, '/login')
 
 if __name__ == "__main__":
     db.init_app(app)
